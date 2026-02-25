@@ -113,17 +113,6 @@ class Desision_Tree():
         else:
             return self.make_prediction(x,tree.right)
 
-data=pd.read_csv("iris.csv")
-X=data.iloc[:,:-1].values
-Y=data.iloc[:,-1].values.reshape(-1,1)
-
-x_train,x_test,y_train,y_test=train_test_split(X,Y,test_size=0.2,random_state=42)
-
-model=Desision_Tree(min_sample_split=3,max_depth=3)
-model.fit(x_train,y_train)
-y_pred=model.predict(x_test)
-print(accuracy_score(y_test,y_pred))
-print(accuracy_score(y_train,model.predict(x_train)))
 
 
 

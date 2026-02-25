@@ -10,6 +10,8 @@ class LinearRegression():
         self.learning_rate=learning_rate
         self.theta=theta
         self.loss_history=[]
+    
+ 
      
 
     def _prepare_data(self,X,Y):
@@ -25,18 +27,17 @@ class LinearRegression():
     
     def fit(self,X,Y):
         X,Y,m=self._prepare_data(X,Y)
-        iteration=0
         min_diff=1e-6
 
-        while iteration<self.max_iteration:
-            y_hat=X.dot(self.theta)
+        for i in range(self.max_iteration):
+            y_hat=X@self.theta
             gradient=(1/m)*(X.T)@(y_hat-Y)
             loss=((y_hat-Y)**2).mean()
             self.loss_history.append(loss)
             self.theta=self.theta-(self.learning_rate*gradient)
-            if iteration>0 and abs(self.loss_history[-2]-loss)<min_diff:
+            if i>3 and abs(self.loss_history[-2]-loss)<min_diff:
                 break
-            iteration+=1
+
 
     def predict(self,X):
         m=X.shape[0]
