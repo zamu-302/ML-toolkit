@@ -37,6 +37,8 @@ class LinearRegression():
             self.theta=self.theta-(self.learning_rate*gradient)
             if i>3 and abs(self.loss_history[-2]-loss)<min_diff:
                 break
+    def Loss(self):
+        return self.loss_history
 
 
     def predict(self,X):

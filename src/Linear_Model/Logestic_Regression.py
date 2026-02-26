@@ -29,6 +29,9 @@ class LogisticRegression():
             if i%100==0:
                self.cost.append(-(1/m) * np.sum(Y * np.log(h_hat+1e-9) + (1 - Y) * np.log(1 - h_hat+1e-9))) 
             self.theta=self.theta-self.learning_rate*gradient 
+    def Loss(self):
+        return self.cost
+
     
     def predict(self,X):
         m=X.shape[0]
