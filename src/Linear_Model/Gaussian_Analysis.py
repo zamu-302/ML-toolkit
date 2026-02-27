@@ -1,19 +1,7 @@
 import pandas as pd 
 import numpy as np 
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import make_classification
-from sklearn.metrics import accuracy_score
 
-X,Y=make_classification(
-    n_features=4,
-    n_samples=10000,
-    random_state=42,
-    n_redundant=0,
-    n_informative=2,
-    n_clusters_per_class=1,
-    class_sep=1.5
 
-)
 
 
 class GDA():
@@ -55,10 +43,4 @@ class GDA():
         y_hat=(h_hat>=0.5).astype(int)
         return y_hat
 
-
-x_train,x_test,y_train,y_test=train_test_split(X,Y,test_size=0.2,random_state=42)
-
-model=GDA()
-model.fit(x_train,y_train)
-print("Accuracy: ",accuracy_score(y_test,model.predict(x_test)))
 
