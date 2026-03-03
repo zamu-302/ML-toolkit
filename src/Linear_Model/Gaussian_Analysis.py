@@ -13,7 +13,7 @@ class GDA():
     def _prepare_Data(self,X,Y):
         m,n=X.shape
         sigma=np.zeros((n,n))
-        pi=(np.sum(Y)+1)/(len(Y)+2)#laplace smooting
+        pi=(np.sum(Y)+1)/(len(Y)+2)#laplace smooting(avoid division by zero)
         mu0=X[Y==0].mean(axis=0)
         mu1=X[Y==1].mean(axis=0)
 
