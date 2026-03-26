@@ -1,9 +1,5 @@
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import KernelCenterer
-from sklearn.model_selection import cross_validate
 from cvxopt import matrix, solvers
 
 class SVM():
