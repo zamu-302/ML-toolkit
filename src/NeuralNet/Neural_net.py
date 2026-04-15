@@ -1,5 +1,16 @@
 import numpy as np
+from sklearn.datasets import fetch_openml
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import train_test_split
+X,y=fetch_openml('mnist_784', version=1, return_X_y=True)
+X=X.values
+y=y.astype(int).values
+x_temp,x_test,y_temp,y_test=train_test_split(X,y,test_size=10000,random_state=42,stratify=y)
+x_train,x_valid,y_train,y_valid=train_test_split(x_temp,y_temp,test_size=5000,random_state=42,stratify=y_temp)
 
+X=((X/255.0)-0.5)*2.0
 def sigmoid(z):
     return 1/(1+np.exp(-z))
 def softmax(z):
@@ -79,7 +90,128 @@ class NeuralNetMLP:
 
             return (d_loss__dw_out, d_loss__db_out, 
                 d_loss__d_w_h, d_loss__d_b_h)
-    
+
+model=NeuralNetMLP(num_features=28*28,num_hidden_layer=50,num_classes=10)
+
+
+
+epoch=50
+minibatch_size=100
+
+def minibatch_generation(X,y,minibatch_size):
+    index=np.arange(X.shape[0])
+    np.random.shuffle(index)
+
+    for start in range(0,index.shape[0]-minibatch_size+1,minibatch_size):
+        batch_idx=index[start:start+minibatch_size]
+        
+        yield X[batch_idx],y[batch_idx]
+
+
+
+
+
+
+
+def compute_mse_and_acc(nnet,X,y,num_labels=10,minibatch_size=100):
+    mse,correct_pred,num_example=0,0,0
+    minibatch_gen=minibatch_generation(X,y,minibatch_size)
+    for i,(features,targets) in enumerate(minibatch_gen):
+        _,probas=nnet.forward(features)
+
+        predicted_labels=np.argmax(probas,axis=1)
+        onehot_targets=int_to_onehot(targets,num_labels=num_labels)
+        loss=np.mean((onehot_targets-probas)**2)
+        correct_pred+=(predicted_labels==targets).sum()
+
+        num_example+=targets.shape[0]
+        mse+=loss
+    mse=mse/(i+1)
+    acc=correct_pred/num_example
+    return mse,acc
+
+
+
+def train(model,x_train,y_train,x_valid,y_valid,epoch,learning_rate=0.1):
+    epoch_loss=[]
+    epoch_train_acc=[]
+    epoch_valid_acc=[]
+    for e in range(epoch):
+        minibatch_gen=minibatch_generation(x_train,y_train,minibatch_size)
+        for x_train_mini,y_train_mini in minibatch_gen:
+            a_h,a_out=model.forward(x_train_mini)
+            d_loss__d_w_out,d_loss__d_b_out, d_loss__d_w_h, d_loss__d_b_h=model.backward(x_train_mini,a_h,a_out,y_train_mini)
+
+            model.weight_h-=learning_rate*d_loss__d_w_h
+            model.weight_out-=learning_rate*d_loss__d_w_out
+            model.bias_h-=learning_rate*d_loss__d_b_h
+            model.bias_out-=learning_rate*d_loss__d_b_out
+
+            #Model Evaluation
+
+        train_mse, train_acc = compute_mse_and_acc(model, x_train, y_train)
+        valid_mse, valid_acc = compute_mse_and_acc(model, x_valid, y_valid)
+        train_acc, valid_acc = train_acc*100, valid_acc*100
+        epoch_train_acc.append(train_acc)
+        epoch_valid_acc.append(valid_acc)
+        epoch_loss.append(train_mse)
+        print(f'Epoch: {e+1:03d}/{epoch:03d} '
+                f'| Train MSE: {train_mse:.2f} '
+                f'| Train Acc: {train_acc:.2f}% '
+                f'| Valid Acc: {valid_acc:.2f}%')
+            
+    return epoch_loss,epoch_train_acc,epoch_valid_acc
+epoch_loss,epoch_train_acc,epoch_valid_acc=train(model,x_train,y_train,x_valid,y_valid,epoch=58)
+
+plt.plot(range(len(epoch_loss)),epoch_loss)
+plt.ylabel("Mean Squared error")
+plt.xlabel("Epoch")
+plt.show()
+
+#faliure cases
+
+
+X_test_subset = x_test[:1000, :]
+y_test_subset = y_test[:1000]
+
+_, probas = model.forward(X_test_subset)
+test_pred = np.argmax(probas, axis=1)
+
+misclassified_images = X_test_subset[y_test_subset != test_pred][:25]
+misclassified_labels = test_pred[y_test_subset != test_pred][:25]
+correct_labels = y_test_subset[y_test_subset != test_pred][:25]
+
+
+
+
+fig, ax = plt.subplots(nrows=5, ncols=5, 
+                       sharex=True, sharey=True, figsize=(8, 8))
+ax = ax.flatten()
+for i in range(25):
+    img = misclassified_images[i].reshape(28, 28)
+    ax[i].imshow(img, cmap='Greys', interpolation='nearest')
+    ax[i].set_title(f'{i+1}) '
+                    f'True: {correct_labels[i]}\n'
+                    f' Predicted: {misclassified_labels[i]}')
+
+ax[0].set_xticks([])
+ax[0].set_yticks([])
+plt.tight_layout()
+#plt.savefig('figures/11_09.png', dpi=300)
+plt.show()
+
+
+
+
+
+
+             
+
+     
+
+
+
+
 
 
 
